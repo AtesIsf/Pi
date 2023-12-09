@@ -6,7 +6,7 @@ typedef struct Global
 {
 	unsigned int n_points = 1000000;
 	unsigned int n_circle_points = 0;
-	float approx_pi = 0.0f;
+	double approx_pi = 0.0f;
 	bool running = false;
 	std::tuple<int, int> points[100];
 
@@ -25,7 +25,7 @@ void Update(global_t *g)
 	
 
 	if (counter != 0)
-		g->approx_pi = 4/((100.0f * counter)/g->n_circle_points);
+		g->approx_pi = 4/((100.0f * (double)counter)/g->n_circle_points);
 
 	if (!g->running)
 		return;
@@ -81,7 +81,7 @@ void Draw(global_t *g)
 
 	// Draw Text
 	DrawText(TextFormat("Number of Data Points: %u", g->n_points), 40, 40, 50, RAYWHITE);
-	DrawText(TextFormat("Approximated PI: %f", g->approx_pi), 1220, 40, 50, RAYWHITE);
+	DrawText(TextFormat("Approximated PI: %lf", g->approx_pi), 1220, 40, 50, RAYWHITE);
 
 	// Draw FPS
 	DrawFPS(1820, 1240);
