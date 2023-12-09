@@ -1,16 +1,14 @@
-#include <cmath>
 #include <raylib.h>
 #include <random>
 #include <tuple>
-#include <vector>
 
 typedef struct Global
 {
-	unsigned int n_points = 100000;
+	unsigned int n_points = 1000000;
 	unsigned int n_circle_points = 0;
 	float approx_pi = 0.0f;
 	bool running = false;
-	std::vector<std::tuple<int, int>> points;
+	std::tuple<int, int> points[100];
 
 	std::random_device d;
 } global_t;
@@ -27,7 +25,7 @@ void Update(global_t *g)
 	
 
 	if (counter != 0)
-		g->approx_pi = 4/((float) counter/g->n_circle_points);
+		g->approx_pi = 4/((100.0f * counter)/g->n_circle_points);
 
 	if (!g->running)
 		return;
@@ -35,17 +33,20 @@ void Update(global_t *g)
 	std::mt19937 rng(g->d());
 	std::uniform_int_distribution<int> uni(0, 1000);
 
-	int x = uni(rng) + 460;
-	int y = uni(rng) + 140;
+	for (int i = 0; i < 100; i++)
+	{
+		int x = uni(rng) + 460;
+		int y = uni(rng) + 140;
 
-	if (CheckCollisionCircles(Vector2 {960, 640}, 500.0f, Vector2 {(float) x, (float) y}, 1.0f))
-		g->n_circle_points++;
+		if (CheckCollisionCircles(Vector2 {960, 640}, 500.0f, Vector2 {(float) x, (float) y}, 1.0f))
+			g->n_circle_points++;
 
-	g->points.push_back(std::tuple<int, int>(x, y));
+		g->points[i] = std::tuple<int, int>(x, y);
+	}
 
 	counter++;
 
-	if (counter == g->n_points)
+	if (counter == g->n_points/100)
 	{
 		counter = 0;
 		g->running = false;
@@ -54,9 +55,17 @@ void Update(global_t *g)
 
 void Draw(global_t *g)
 {
+	static bool first_frame = true;
 	BeginDrawing();
+	
+	if (first_frame)
+	{
+		ClearBackground(BLACK);
+		first_frame = false;
+	}
 
-	ClearBackground(BLACK);
+	// The illusion of ClearBackground
+	DrawRectangleRec(Rectangle {1600, 0, 320, 1280}, BLACK);
 
 	// Draw Coordinate System
 	DrawRectangleLinesEx(Rectangle {460, 140, 1000, 1000}, 1.0f, WHITE);
@@ -73,6 +82,9 @@ void Draw(global_t *g)
 	// Draw Text
 	DrawText(TextFormat("Number of Data Points: %u", g->n_points), 40, 40, 50, RAYWHITE);
 	DrawText(TextFormat("Approximated PI: %f", g->approx_pi), 1220, 40, 50, RAYWHITE);
+
+	// Draw FPS
+	DrawFPS(1820, 1240);
 
 	// Draw Points
 	for (auto p : g->points)
